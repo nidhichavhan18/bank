@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+        }
+
+        .login-box {
+            width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px gray;
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: darkblue;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Admin Login</h2>
+
+    <form id="loginForm">
+        <input type="email" id="Email" placeholder="Enter Email" required>
+        <input type="password" id="password" placeholder="Enter Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="message"></p>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const Email = document.getElementById("Email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("http://localhost:3000/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include", // for session
+                body: JSON.stringify({ Email, password })
+            });
+
+            const data = await response.json();
+
+            const message = document.getElementById("message");
+
+            if (response.status === 200) {
+                message.style.color = "green";
+                message.innerText = data.message;
+
+                // Redirect to dashboard (optional)
+                setTimeout(() => {
+                    window.location.href = "admin-dashboard.html";
+                }, 1000);
+
+            } else {
+                message.style.color = "red";
+                message.innerText = data.message;
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("message").innerText = "Server error";
+        }
+    });
+</script>
+
+</body>
+</html>

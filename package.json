@@ -1,0 +1,22 @@
+{
+  "name": "bank-application-web",
+  "version": "1.0.0",
+  "description": "create database bank;\r use bank;\r create table user_admin (\r id int auto_increment primary key,  \r Name varchar(50) not null,\r Email varchar(20) unique not null,\r Phoneno bigint unique not null,\r password varchar(30) not null,\r joiningdate datetime default current_timestamp\r );",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mysql2": "^3.19.1"
+  }
+}

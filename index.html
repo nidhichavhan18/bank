@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+</head>
+<body>
+
+    <h2>User Register Form</h2>
+
+    <form id="registerForm">
+        <input type="text" placeholder="Account No" id="account_no"><br><br>
+        <input type="text" placeholder="Name" id="name"><br><br>
+        <input type="number" placeholder="Age" id="age"><br><br>
+
+        <select id="gender">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select><br><br>
+
+        <input type="text" placeholder="Phone No" id="phoneno"><br><br>
+        <input type="text" placeholder="Aadhaar No" id="Aadhaar_no"><br><br>
+        <input type="email" placeholder="Email" id="Email"><br><br>
+        <input type="password" placeholder="Password" id="acc_password"><br><br>
+
+        <select id="account_type">
+            <option value="">Account Type</option>
+            <option value="Saving">Saving</option>
+            <option value="Current">Current</option>
+        </select><br><br>
+
+        <input type="date" id="date_of_birth"><br><br>
+        <input type="text" placeholder="Address" id="Address"><br><br>
+        <input type="text" placeholder="IFSC Code" id="IFSC"><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p id="message"></p>
+
+<script>
+document.getElementById("registerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+        account_no: document.getElementById("account_no").value,
+        name: document.getElementById("name").value,
+        age: document.getElementById("age").value,
+        gender: document.getElementById("gender").value,
+        phoneno: document.getElementById("phoneno").value,
+        Aadhaar_no: document.getElementById("Aadhaar_no").value,
+        Email: document.getElementById("Email").value,
+        acc_password: document.getElementById("acc_password").value,
+        account_type: document.getElementById("account_type").value,
+        date_of_birth: document.getElementById("date_of_birth").value,
+        Address: document.getElementById("Address").value,
+        IFSC: document.getElementById("IFSC").value
+    };
+
+    try {
+        const response = await fetch("http://localhost:3000/user/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        document.getElementById("message").innerText = result.message;
+
+    } catch (error) {
+        document.getElementById("message").innerText = "Error connecting to server";
+    }
+});
+</script>
+
+</body>
+</html>

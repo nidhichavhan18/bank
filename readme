@@ -1,0 +1,54 @@
+create database bank;
+use bank;
+create table user_admin (
+id int auto_increment primary key,  
+Name varchar(50) not null,
+Email varchar(20) unique not null,
+Phoneno bigint unique not null,
+password varchar(30) not null,
+joiningdate datetime default current_timestamp
+);
+
+create table banks (
+id int auto_increment primary key,  
+BankName varchar(50) not null ,
+bank_code int unique not null,
+bank_password varchar(20) not null,
+IFSC varchar(15) unique not null,
+Bankaddress text,
+call_centre_toll_free_no bigint unique,
+joiningdate datetime default current_timestamp
+);
+
+create table Accounts (
+account_no bigint primary key,
+name varchar(30) not null,
+age int check(age>=16) not null,
+gender varchar(10) not null,
+phoneno bigint unique not null,
+Aadhaar_no bigint unique not null,
+Email varchar(30) unique not null,
+acc_password varchar (20) not null,
+account_type varchar(20) not null,
+date_of_birth date not null,
+Address text not null,
+balance double default 0,
+bank_id int, 
+BankName varchar(50) not null ,
+IFSC varchar(15) unique not null,
+account_opening_date datetime default current_timestamp,
+foreign key (bank_id) references banks(id) on delete restrict
+);
+
+create table Transaction_log (
+Transaction_id bigint primary key,
+senders_account_no bigint not null,
+senders_bank_name varchar(50) not null,
+recievers_account_no bigint,
+recievers_bank_name varchar(50) default "self",
+Amount double not null,
+total_balance double not null,
+transaction_type varchar(15) not null,
+transaction_status varchar(20) not null,
+transaction_time datetime default current_timestamp,
+foreign key(senders_account_no) references  Accounts(account_no) on delete cascade);
