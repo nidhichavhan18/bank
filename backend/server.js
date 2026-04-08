@@ -9,13 +9,6 @@ require("dotenv").config();
 const app = express();
 app.use(bodyParser.json());
 
-// 👇 THis is   important LINE
-app.use(express.static(path.join(__dirname, "../")));
-
-// 👇 Home route
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../index.html"));
-});
 /* Session Middleware */
 app.use(
     session({
@@ -27,6 +20,14 @@ app.use(
         }
     })
 );
+
+// 👇 THis is   important LINE
+app.use(express.static(path.join(__dirname, "../")));
+
+// 👇 Home route
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../index.html"));
+});
 
 
 // MySQL Connection
@@ -116,7 +117,6 @@ app.get("/admin/dashboard", (req, res) => {
     });
 
 });
-
 
 /* Add New Bank (Admin Only) */
 app.post("/admin/add-bank", async (req, res) => {

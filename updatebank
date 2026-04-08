@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Bank Credentials</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2f7;
+        }
+
+        .container {
+            width: 350px;
+            margin: 100px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #message {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Update Bank Credentials</h2>
+
+    <input type="number" id="bankId" placeholder="Enter Bank ID" required>
+    <input type="text" id="bank_code" placeholder="New Bank Code" required>
+    <input type="password" id="bank_password" placeholder="New Password" required>
+
+    <button onclick="updateCredentials()">Update</button>
+
+    <p id="message"></p>
+</div>
+
+<script>
+    async function updateCredentials() {
+        const bankId = document.getElementById("bankId").value;
+        const bank_code = document.getElementById("bank_code").value;
+        const bank_password = document.getElementById("bank_password").value;
+        const message = document.getElementById("message");
+
+        if (!bankId || !bank_code || !bank_password) {
+            message.style.color = "red";
+            message.innerText = "All fields are required";
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3000/admin/update-bank-credentials/${bankId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({ bank_code, bank_password })
+            });
+
+            const result = await response.json();
+
+            if (response.status === 200) {
+                message.style.color = "green";
+                message.innerText = result.message;
+
+                // Clear form
+                document.getElementById("bankId").value = "";
+                document.getElementById("bank_code").value = "";
+                document.getElementById("bank_password").value = "";
+
+            } else {
+                message.style.color = "red";
+                message.innerText = result.message;
+
+                if (response.status === 401) {
+                    setTimeout(() => {
+                        window.location.href = "admin-login.html";
+                    }, 1500);
+                }
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            message.innerText = "Server error";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Bank</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f8f9fa;
+        }
+
+        .container {
+            width: 350px;
+            margin: 100px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+            text-align: center;
+        }
+
+        h2 {
+            color: red;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: darkred;
+        }
+
+        #message {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Delete Bank</h2>
+
+    <input type="number" id="bankId" placeholder="Enter Bank ID" required>
+
+    <button onclick="deleteBank()">Delete Bank</button>
+
+    <p id="message"></p>
+</div>
+
+<script>
+    async function deleteBank() {
+        const bankId = document.getElementById("bankId").value;
+        const message = document.getElementById("message");
+
+        if (!bankId) {
+            message.style.color = "red";
+            message.innerText = "Please enter Bank ID";
+            return;
+        }
+
+        // Confirm before delete
+        const confirmDelete = confirm("Are you sure you want to delete this bank?");
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`http://localhost:3000/admin/delete-bank/${bankId}`, {
+                method: "DELETE",
+                credentials: "include"
+            });
+
+            const result = await response.json();
+
+            if (response.status === 200) {
+                message.style.color = "green";
+                message.innerText = result.message;
+
+                document.getElementById("bankId").value = "";
+
+            } else {
+                message.style.color = "red";
+                message.innerText = result.message;
+
+                if (response.status === 401) {
+                    setTimeout(() => {
+                        window.location.href = "admin-login.html";
+                    }, 1500);
+                }
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            message.innerText = "Server error";
+        }
+    }
+</script>
+
+</body>
+</html>

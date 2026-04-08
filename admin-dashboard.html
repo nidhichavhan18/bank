@@ -1,113 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
 
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f4f4;
-        }
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(to right, #4facfe, #00f2fe);
+        margin: 0;
+    }
 
-        .container {
-            width: 400px;
-            margin: 100px auto;
-            background: white;
-            padding: 20px;
-            box-shadow: 0px 0px 10px gray;
-            border-radius: 10px;
-            text-align: center;
-        }
+    .container {
+        width: 85%;
+        margin: 40px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+    }
 
-        h2 {
-            color: green;
-        }
+    h2 {
+        text-align: center;
+        color: #333;
+    }
 
-        .info {
-            margin-top: 20px;
-            text-align: left;
-        }
+    /* Dropdown */
+    select {
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
 
-        .info p {
-            font-size: 16px;
-            margin: 5px 0;
-        }
+    /* Sections */
+    .section {
+        display: none;
+        margin-top: 15px;
+    }
 
-        button {
-            margin-top: 20px;
-            padding: 10px;
-            width: 100%;
-            background: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+    .active {
+        display: block;
+    }
 
-        button:hover {
-            background: darkred;
-        }
-    </style>
+    /* Form */
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        transition: 0.3s;
+    }
+
+    input:focus, textarea:focus {
+        border-color: #4facfe;
+        outline: none;
+        box-shadow: 0 0 5px #4facfe;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #4facfe;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #007bff;
+    }
+
+    /* Table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background: #4facfe;
+        color: white;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+    }
+
+    /* Message */
+    #message {
+        text-align: center;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+</style>
+
 </head>
 <body>
 
 <div class="container">
     <h2>Admin Dashboard</h2>
 
-    <div id="welcome"></div>
+    <!-- Dropdown -->
+    <select onchange="handleMenu(this.value)">
+        <option value="add" selected>Add Bank</option>
+        <option value="list">List All Banks</option>
+        <option value="logout">Logout</option>
+    </select>
 
-    <div class="info" id="adminInfo"></div>
+    <!-- Add Bank -->
+    <div id="addSection" class="section active">
+        <h3>Add New Bank</h3>
 
-    <button onclick="logout()">Logout</button>
+        <form id="bankForm">
+            <input type="text" id="BankName" placeholder="Bank Name" required>
+            <input type="text" id="bank_code" placeholder="Bank Code" required>
+            <input type="password" id="bank_password" placeholder="Password" required>
+            <input type="text" id="IFSC" placeholder="IFSC" required>
+            <textarea id="Bankaddress" placeholder="Address"></textarea>
+            <input type="text" id="call_centre_toll_free_no" placeholder="Toll Free Number">
+
+            <button type="submit">Add Bank</button>
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <!-- List Banks -->
+    <div id="listSection" class="section">
+        <h3>All Banks</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Bank Name</th>
+                    <th>Code</th>
+                    <th>IFSC</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody id="bankTable"></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-    async function loadDashboard() {
-        try {
-            const response = await fetch("http://localhost:3000/admin/dashboard", {
-                method: "GET",
-                credentials: "include" // important for session
-            });
+function handleMenu(value) {
+    document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
 
-            const data = await response.json();
+    if (value === "add") {
+        document.getElementById("addSection").classList.add("active");
+    } 
+    else if (value === "list") {
+        document.getElementById("listSection").classList.add("active");
+        loadBanks();
+    } 
+    else if (value === "logout") {
+        logout();
+    }
+}
 
-            if (response.status === 200) {
-                document.getElementById("welcome").innerHTML =
-                    `<h3>${data.message}</h3>`;
+// Add Bank
+document.getElementById("bankForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
 
-                document.getElementById("adminInfo").innerHTML = `
-                    <p><strong>ID:</strong> ${data.admin.id}</p>
-                    <p><strong>Name:</strong> ${data.admin.name}</p>
-                    <p><strong>Email:</strong> ${data.admin.email}</p>
+    const data = {
+        BankName: document.getElementById("BankName").value,
+        bank_code: document.getElementById("bank_code").value,
+        bank_password: document.getElementById("bank_password").value,
+        IFSC: document.getElementById("IFSC").value,
+        Bankaddress: document.getElementById("Bankaddress").value,
+        call_centre_toll_free_no: document.getElementById("call_centre_toll_free_no").value
+    };
+
+    const res = await fetch("http://localhost:3000/admin/add-bank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (res.status === 201) {
+        document.getElementById("message").style.color = "green";
+        document.getElementById("message").innerText = result.message;
+        document.getElementById("bankForm").reset();
+    } else {
+        document.getElementById("message").style.color = "red";
+        document.getElementById("message").innerText = result.message;
+    }
+});
+
+// Load Banks
+async function loadBanks() {
+    try {
+        const res = await fetch("http://localhost:3000/admin/banks", {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const result = await res.json();
+        const table = document.getElementById("bankTable");
+
+        if (res.status === 200) {
+            table.innerHTML = "";
+
+            result.data.forEach(bank => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${bank.id}</td>
+                        <td>${bank.BankName}</td>
+                        <td>${bank.bank_code}</td>
+                        <td>${bank.IFSC}</td>
+                        <td>${bank.Bankaddress || "-"}</td>
+                    </tr>
                 `;
-            } else {
-                alert(data.message);
-                window.location.href = "admin-login.html";
-            }
-
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Server error");
-        }
-    }
-
-    // Logout function
-    async function logout() {
-        try {
-            await fetch("http://localhost:3000/admin/logout", {
-                method: "GET",
-                credentials: "include"
             });
 
-            window.location.href = "admin-login.html";
-
-        } catch (error) {
-            console.error("Logout error:", error);
+        } else {
+            alert(result.message);
         }
-    }
 
-    // Load dashboard on page load
-    loadDashboard();
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Server error");
+    }
+}
+
+// Logout
+async function logout() {
+    await fetch("http://localhost:3000/admin/logout", {
+        method: "GET",
+        credentials: "include"
+    });
+
+    window.location.href = "admin-login.html";
+}
 </script>
 
 </body>

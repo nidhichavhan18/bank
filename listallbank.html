@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Banks (Admin)</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+        }
+
+        .container {
+            width: 90%;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: darkred;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>All Banks (Admin)</h2>
+
+    <p id="message"></p>
+
+    <table id="bankTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Bank Name</th>
+                <th>Bank Code</th>
+                <th>IFSC</th>
+                <th>Address</th>
+                <th>Toll Free No</th>
+                <th>Joining Date</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+    async function loadBanks() {
+        try {
+            const response = await fetch("http://localhost:3000/admin/banks", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            const result = await response.json();
+            const message = document.getElementById("message");
+            const tableBody = document.querySelector("#bankTable tbody");
+
+            if (response.status === 200) {
+                message.style.color = "green";
+                message.innerText = result.message + " (Total: " + result.total_banks + ")";
+
+                tableBody.innerHTML = "";
+
+                result.data.forEach(bank => {
+                    const row = `
+                        <tr>
+                            <td>${bank.id}</td>
+                            <td>${bank.BankName}</td>
+                            <td>${bank.bank_code}</td>
+                            <td>${bank.IFSC}</td>
+                            <td>${bank.Bankaddress || "-"}</td>
+                            <td>${bank.call_centre_toll_free_no || "-"}</td>
+                            <td>${new Date(bank.joiningdate).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+            } else {
+                message.style.color = "red";
+                message.innerText = result.message;
+
+                if (response.status === 401) {
+                    setTimeout(() => {
+                        window.location.href = "admin-login.html";
+                    }, 1500);
+                }
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("message").innerText = "Server error";
+        }
+    }
+
+    async function logout() {
+        await fetch("http://localhost:3000/admin/logout", {
+            method: "GET",
+            credentials: "include"
+        });
+
+        window.location.href = "admin-login.html";
+    }
+
+    // Load banks on page load
+    loadBanks();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Bank</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2f7;
+        }
+
+        .container {
+            width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: orange;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: darkorange;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Edit Bank</h2>
+
+    <form id="editForm">
+        <input type="text" id="BankName" placeholder="Bank Name" required>
+        <input type="text" id="bank_code" placeholder="Bank Code" required>
+        <input type="text" id="IFSC" placeholder="IFSC Code" required>
+        <textarea id="Bankaddress" placeholder="Bank Address"></textarea>
+        <input type="text" id="call_centre_toll_free_no" placeholder="Toll Free Number">
+
+        <button type="submit">Update Bank</button>
+    </form>
+
+    <p id="message"></p>
+</div>
+
+<script>
+    // Get bank ID from URL (example: edit-bank.html?id=1)
+    const urlParams = new URLSearchParams(window.location.search);
+    const bankId = urlParams.get("id");
+
+    if (!bankId) {
+        alert("Bank ID is missing!");
+        window.location.href = "admin-banks.html";
+    }
+
+    // OPTIONAL: Load existing data (if you create GET single bank API later)
+    // For now user will manually edit fields
+
+    document.getElementById("editForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const data = {
+            BankName: document.getElementById("BankName").value,
+            bank_code: document.getElementById("bank_code").value,
+            IFSC: document.getElementById("IFSC").value,
+            Bankaddress: document.getElementById("Bankaddress").value,
+            call_centre_toll_free_no: document.getElementById("call_centre_toll_free_no").value
+        };
+
+        try {
+            const response = await fetch(`http://localhost:3000/admin/edit-bank/${bankId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            const message = document.getElementById("message");
+
+            if (response.status === 200) {
+                message.style.color = "green";
+                message.innerText = result.message;
+
+                setTimeout(() => {
+                    window.location.href = "admin-banks.html";
+                }, 1500);
+
+            } else {
+                message.style.color = "red";
+                message.innerText = result.message;
+
+                if (response.status === 401) {
+                    setTimeout(() => {
+                        window.location.href = "admin-login.html";
+                    }, 1500);
+                }
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("message").innerText = "Server error";
+        }
+    });
+</script>
+
+</body>
+</html>
